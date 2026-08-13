@@ -1,6 +1,11 @@
 footage/
+frames/
+testclips/
 *.h264
 *.mp4
 *.jpg
 *.jpeg
 *.log
+.DS_Store
+.ipynb_checkpoints/
+uv.lock
