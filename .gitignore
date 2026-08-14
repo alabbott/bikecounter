@@ -11,3 +11,4 @@ candidates/
 .ipynb_checkpoints/
 uv.lock
 *.pt
+.env
