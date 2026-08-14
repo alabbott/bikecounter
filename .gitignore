@@ -1,6 +1,7 @@
 footage/
 frames/
 testclips/
+candidates/
 *.h264
 *.mp4
 *.jpg
@@ -9,3 +10,4 @@ testclips/
 .DS_Store
 .ipynb_checkpoints/
 uv.lock
+*.pt

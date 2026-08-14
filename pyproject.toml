@@ -6,5 +6,7 @@ dependencies = [
     "ipywidgets>=8.1.8",
     "jupyterlab>=4.5.10",
     "jupyterlab-vim>=4.1.4",
+    "supervision>=0.30.0",
     "tdqm>=0.0.1",
+    "ultralytics>=8.4.119",
 ]
