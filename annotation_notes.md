@@ -23,3 +23,47 @@ I'm sort of compute limited with only a M4 Macbook Air and a GTX 1060, and uploa
 ## Labeling Cost
 
 As I'm about to run auto-label, I see that SAM3 costs 1 credit / 1000 images, which makes me feel much better about choosing to mine locally and saving 13 credits on what could be empty pavement. I'm certain I'm missing northbound bikes in the near lane that yolo26m missed, but I can fix that with hand-picking frames rather than burning credits.
+
+## Thoughts on Roboflow Labeler
+
+I manually created a project through the web UI. The upload notebook landed my 994 images in the project with a batch ready to be annotated and labeled. I chose to use the auto-labeler and was pretty happy with the results. It did have several false positives of scooters, notably a parked scooter with just the handlebars visible at the bottom of the frame, but mostly detected bicycles and correctly boxed them. The review process was as quick and painless as reviewing ~1,000 images can be I imagine. The Labeler UI was easy to use and had nice keyboard shortcuts. The process of reviewing all of the annotations took a couple hours, spread throughout the weekend when I wasn't watching the Chicago Air and Water show.
+
+I wish the select tool would choose the smallest box first, but it defaults to the larger one pretty often. This is easy to workaround with the layers tab and probably depends on what you're labeling but over ~1,000 images of bicycles, I find I usually want to delete the smaller box, and keep the larger one.
+
+Once I had reviewed all of the annotations, I moved the images into a dataset and created a new version. I chose to use only auto-orient for preprocessing and no augmentations, since I wasn't certain what I would need for training.
+
+## Training on Roboflow
+
+After finalizing my dataset, I began to train my model. I chose to use the RF-DETR model that Roboflow recommended, stuck with the default small model, and used the Objects365 pretrained weights. I left it at the default 100 epochs to start with. I chose to start with the small model and defaults where available so that I could get a good starting place without spending too many credits. Candidly, I'm not really sure how to use all of the settings available and wanted to prioritize getting results, learning from failures, and optimizing from there rather than try to learn it all at once, or optimize before I know what my problems are.
+
+### Preprocessing and Augmentation
+
+When I went to train the RF-DETR model, Roboflow advised resizing images to 512x512px, so I did. At this point I was trying to make progress towards results I can evaluate rather than optimize my data. That said, I did make some choices to try and avoid some foreseeable issues. I chose to fit to size and fill with black, rather than stretch a 16:9 image to 1:1, which would cause distortion in bicycle geometries. I also opted to use no augmentations, which I didn't feel would materially help for my bicycle counting use case, and would just mask the size of my dataset.
+
+I considered trying to use the large images anyway, but decided to stick with the recommended smaller size with the default small model, again prioritizing getting a result I can evaluate quickly, rather than trying to optimize for problems I'm not sure I have.
+
+### Issues with training
+
+When I uploaded my images, I specified train and valid splits, but did not reserve images for a test split. Rather than going back and manually selecting the split, I let Roboflow do so automatically. This introduces the risk of adjacent frames appearing in train and test splits, which I was trying to avoid, but after spending keyboard time on reviewing and correcting annotations, I just wanted to move forward and try training a model. When I start to understand how the model performs in real world test cases, I can go back and optimize my dataset and address other failure modes. 
+
+### Progress over perfection
+
+I've made some choices, some better informed than others, but there are trade-offs between spending time and brainpower trying to make perfect decisions now, versus failing and iterating quickly. I need to understand how the model performs, how an off-the-shelf model like YOLO26 or RF-DETR performs, and what their failure modes on my use case actually are. If I observe false positives on non-bicycle objects, false negatives in some frames causing flicker, or poor performance on northbound or southbound bicycles then I will better understand what levers to pull when I train another model.
+
+### Training Results
+
+The training plateaued pretty quickly, mAP@50 starts high (95%) and never really improves. mAP@50-95 climbs from 66% to 72% by epoch 10 but doesn't improve from there. Roboflow cut the training short at 31 epochs, which was nice because it's clear there wasn't more improvement to be had and it saved me some credits.
+
+The high initial mAP@50 performance and early plateau makes sense for a pretrained model on a common class like bicycles. I primarily want to fine tune for my specific camera angle and some of the unique bicycles in Chicago, cargo bikes, Divvy bikes, e-bikes with weird geometries.
+
+It could also be due to a validation set that is too similar to the training set. I know this could be an issue due to the automatic assignment of train, valid, and test splits, which contain very similar frames of the same cyclist.
+
+The takeaway from this initial training is that more epochs won't help. The model generally seems to have started good and stayed good. The weak mAP@50-95 suggests my primary issue is localization, which could be partly due to hand-drawn boxes on my training images combined with inconsistent decisions when riders partially obscured bike features. It could also be caused by the low resolution of the images and relatively small objects I'm looking for. The real tell will be how well it counts bicycles. False positives and flicker could still be real issues affecting the outcome of the project.
+
+Next steps I'd like to try, training wise, are seeing how a YOLO model performs after fine tuning, compared to the RF-DETR model. RF-DETR seems to have started off better than the YOLO model I used for mining, it would be interesting to see how a YOLO model performs over a few epochs of training. I would also like to try feeding larger images into the RF-DETR model, and see if that improves my mAP@50-95 scores. But again, the real tell is how well I can count bikes, which I have not done yet, so that's where I'll go next.
+
+### A note on small objects
+
+All of my bicycles fall into the small or medium buckets, with no bicycle appearing large enough in frame to be considered large. This combined with the resizing of images to 512x512px, fit with black borders, means my small objects are, well, really small. It's still not clear to me if this will be a problem but if I have issues with the further away southbound bike lane, I may need to train and run inference on larger images. This could turn into a balancing act of compute resources on the Pi vs model performance on image size, but we'll cross that bridge when we get there.
+
+Another interesting finding, mAP@50 on medium objects came back lower than mAP@50 on small objects (98.0% vs 99.3%). While this isn't a very meaningful result on its own, it suggests that my observations during the mining pass were correct, and the greater viewing angle on the much closer northbound bikes hinders performance more than the smaller bikes being further away, but more straight on relative to the camera.
