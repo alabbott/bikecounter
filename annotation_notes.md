@@ -67,3 +67,13 @@ Next steps I'd like to try, training wise, are seeing how a YOLO model performs 
 All of my bicycles fall into the small or medium buckets, with no bicycle appearing large enough in frame to be considered large. This combined with the resizing of images to 512x512px, fit with black borders, means my small objects are, well, really small. It's still not clear to me if this will be a problem but if I have issues with the further away southbound bike lane, I may need to train and run inference on larger images. This could turn into a balancing act of compute resources on the Pi vs model performance on image size, but we'll cross that bridge when we get there.
 
 Another interesting finding, mAP@50 on medium objects came back lower than mAP@50 on small objects (98.0% vs 99.3%). While this isn't a very meaningful result on its own, it suggests that my observations during the mining pass were correct, and the greater viewing angle on the much closer northbound bikes hinders performance more than the smaller bikes being further away, but more straight on relative to the camera.
+
+## Testing the model
+
+I started by counting the number of northbound and southbound bikes in two of my test clips, one with low traffic volume in the 14:00 hour (clip_20260812_140056) and one during the evening rush in the 17:00 hour (clip_20260812_170115). I had Claude write a helper to play the clip and log NB or SB bikes on a keypress and write the results to CSV. This felt like a good use of AI assistance to accelerate the process. The helper can be found in count_manual.py and could be handy again later.
+
+I had to decide whether to count bikes being walked or bikes on the CTA bus racks would be counted as well, I decided to include all bikes in frame in the totals and will keep that in mind when placing the counting lines. The lines will need to be placed across the whole frame, including sidewalks and traffic lanes, rather than just the bike lanes. This lets me count riders in the traffic lanes or sidewalks, and doesn't add the complication of discerning a walked bike or bike on a rack.
+
+The midday clip had 4 NB and 9 SB bikes while the rush hour clip had 19 NB and 11 SB, over double the volume and importantly, dominated by NB bikes, which the yolo26m model used for mining struggled with. The total number of bikes is ultimately quite small and will lead to higher error rates from missing or double counting 1-2 bikes, which is worth considering when evaluating model performance later.
+
+Once I had a ground truth number, I had real data to test my pipeline against when testing different models.
