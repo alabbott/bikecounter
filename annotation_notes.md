@@ -77,3 +77,10 @@ I had to decide whether to count bikes being walked or bikes on the CTA bus rack
 The midday clip had 4 NB and 9 SB bikes while the rush hour clip had 19 NB and 11 SB, over double the volume and importantly, dominated by NB bikes, which the yolo26m model used for mining struggled with. The total number of bikes is ultimately quite small and will lead to higher error rates from missing or double counting 1-2 bikes, which is worth considering when evaluating model performance later.
 
 Once I had a ground truth number, I had real data to test my pipeline against when testing different models.
+
+
+### Picking the line
+
+I had Claude write a line picker utility. This was used to pick a line that spans roughly the whole frame vertically, including both bike lanes, the SB sidewalk, and the traffic lanes. I don't have a view of the NB sidewalk in my frame and this is something to address later.
+
+Line chosen as points: (1426,1054), (920,10)
