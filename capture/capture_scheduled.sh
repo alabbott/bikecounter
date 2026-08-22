@@ -1,8 +1,8 @@
 #!/bin/bash
-# ~/bikecounter/capture_scheduled.sh
+# ~/bikecounter/capture/capture_scheduled.sh
 # Records 15-min clips, but only between 5:00am and 10:00am
 
-OUTDIR="./footage"
+OUTDIR="../footage"
 DURATION_MS=900000   # 15 minutes
 WIDTH=1920
 HEIGHT=1080

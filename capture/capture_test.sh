@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OUTDIR="./footage"
+OUTDIR="../footage"
 DURATION_MS=60000    # 1 minute
 WIDTH=1920
 HEIGHT=1080
