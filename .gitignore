@@ -10,6 +10,7 @@ cache/
 *.log
 .DS_Store
 .ipynb_checkpoints/
+.virtual_documents/
 uv.lock
 *.pt
 .env
