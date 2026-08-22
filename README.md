@@ -2,7 +2,7 @@
 
 A Raspberry Pi in a Logan Square window counting bicycles on Milwaukee Ave.
 
-[![Counting demo](https://img.youtube.com/vi/C8gbk7H4uX4/maxresdefault.jpg)](https://youtu.be/C8gbk7H4uX4)
+[![Counting demo](https://img.youtube.com/vi/C8gbk7H4uX4/maxresdefault.jpg)](https://youtu.be/C8gbk7H4uX4&t=270)
 
 ## Results
 
